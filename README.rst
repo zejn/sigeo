@@ -23,7 +23,7 @@ Opombe
 
 Slovenija ima svoj koordinatni sistem, ki je v primerjavi z WGS 84 (GPS, SRID
 4326) koordinatami zamaknjen za priblizno 1 sekundo in 17 sekund po drugi osi.
-To so priblizne stevilke, prave enacbe pa se nimam. Če jo poznas, prosim
+To so priblizne stevilke, prave enacbe pa se nimam. Ce jo poznas, prosim
 pomagaj.
 
 Nastavitev projekta
