@@ -82,6 +82,7 @@ INSTALLED_APPS = (
     'django.contrib.gis',
     'sigeo.obcine',
     'sigeo.naselja',
+    'sigeo.ulice',
 )
 
 try:
