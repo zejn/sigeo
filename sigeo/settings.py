@@ -81,6 +81,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.gis',
     'sigeo.obcine',
+    'sigeo.naselja',
 )
 
 try:
