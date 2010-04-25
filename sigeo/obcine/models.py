@@ -2,8 +2,9 @@
 from django.contrib.gis.db import models
 
 class Obcina(models.Model):
+	gid = models.AutoField(primary_key=True)
 	ob_mid = models.DecimalField(max_digits=8, decimal_places=0)
-	ob_id  = models.DecimalField(max_digits=3, decimal_places=0, primary_key=True)
+	ob_id  = models.DecimalField(max_digits=3, decimal_places=0)
 	ob_ime  = models.CharField(max_length=30)
 	ob_uime  = models.CharField(max_length=50)
 	ob_dj  = models.CharField(max_length=50)
