@@ -83,6 +83,7 @@ INSTALLED_APPS = (
     'sigeo.obcine',
     'sigeo.naselja',
     'sigeo.ulice',
+    'sigeo.kataster',
 )
 
 try:
