@@ -1,6 +1,7 @@
-
+# *-* coding: utf-8 *-*
 from django.core.management.base import BaseCommand
 from optparse import make_option
+from django.db import transaction
 
 class Command(BaseCommand):
 	help = "Nalozi bazo in geopodatke katastrov"
@@ -9,6 +10,7 @@ class Command(BaseCommand):
 			help='drop table if exist before loading new data'),
 		)
 	
+	@transaction.commit_on_success()
 	def handle(self, *args, **options):
 		from django.db import connection
 		from sigeo.kataster.models import KatastrskaObcina
@@ -49,7 +51,19 @@ class Command(BaseCommand):
 			ob.the_geom.transform(trans)
 			ob.save()
 		cur.execute('''ALTER TABLE %s ADD CONSTRAINT enforce_srid_the_geom CHECK (st_srid(the_geom) = 4326);''' % table_name)
-		connection.connection.commit()
+		cur.execute('''UPDATE geometry_columns SET srid=4326 WHERE f_table_name='%s' AND f_geometry_column='the_geom';''' % table_name)
+		
+		# check it's ok
+		from django.contrib.gis.geos import GEOSGeometry
+		c = KatastrskaObcina.objects.get(sifko=6)
+		assert c.imeko.upper() == u'ČEPINCI'
+		assert c.the_geom.centroid == GEOSGeometry('POINT (16.2078106090320908 46.8565645279100167)')
+		s = KatastrskaObcina.objects.get(sifko=1)
+		assert s.imeko.upper() == u'HODOŠ'
+		assert s.the_geom.centroid == GEOSGeometry('POINT (16.3215871980173901 46.8371080639927513)')
+		z = KatastrskaObcina.objects.get(sifko=11)
+		assert z.imeko.upper() == u'ŽENAVLJE'
+		assert z.the_geom.centroid == GEOSGeometry('POINT (16.1710307426937661 46.8380629177534189)')
 		
 		print 'Done.'
 

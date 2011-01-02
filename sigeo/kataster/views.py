@@ -12,5 +12,16 @@ def polys(request, id):
     all_poly.append('''polygon = polyById[%s]; map.addOverlay(polygon);''' % obc.sifko)
     return HttpResponse('\n'.join(all_poly), mimetype='text/javascript')
 
+def reverse_kobcina(request):
+    latlon = request.GET.get('ll', None)
+    obcina_id = None
+    if latlon:
+        lat, lon = [float(i) for i in latlon.split(',')]
+        obcina = KatastrskaObcina.objects.get(the_geom__contains='POINT(%f %f)' % (lon, lat))
+        obcina_id = obcina.ob_id
+    return HttpResponse(simplejson.dumps({'status':'ok', 'obcina_id': obcina_id}))
+
 def index(request):
     return render_to_response('katastrskaobcina/index.html', {'obcine': KatastrskaObcina.objects.all()})
+
+
