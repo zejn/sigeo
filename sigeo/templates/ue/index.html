@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script src="/static/jquery-1.3.2.min.js"></script>
+<script>
+var map;
+
+function initialize() {
+    var mapOpts = {
+        center: new google.maps.LatLng(46.109535, 14.804333),
+        zoom: 8,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    map = new google.maps.Map(document.getElementById('map'), mapOpts);
+    google.maps.event.addListener(map, 'click', function (event) {
+        if (marker) {
+            marker.setMap(null);
+        }
+        marker = new google.maps.Marker({position: event.latLng, map:map});
+        e = event.latLng;
+        $.ajax({
+            url: "/ue/reverse/?ll=" + event.latLng.lat() + "," + event.latLng.lng(),
+            dataType: 'json',
+            data: null,
+            success: function (data) {
+                if (data.obcina_id) {
+                    $("#" + data.obcina_id).click();
+                }
+            }
+        });
+
+    });
+}
+</script>
+<script>
+
+var polyById = {};
+var polygons = [];
+
+var obcinaByID = {};
+{% for obcina in obcine %}
+obcinaByID[{{ obcina.ue_id }}] = {
+    name: "{{ obcina }}",
+    lat: {{ obcina.the_geom.centroid.y }},
+    lng: {{ obcina.the_geom.centroid.x }}
+};
+{% endfor %}
+
+
+var marker;
+
+$(document).ready(function () {
+    initialize();
+    function activate_obcine() {
+        $('.obcina').each(function () {
+            $(this).click(function() {
+                var i;
+                // var center2 = new GGeoXml("http://localhost:8000/kml/" + this.id + "/");
+                for (i=0;i<polygons.length;i++) {
+                    polygons[i].setMap(null);
+                }
+                if (polyById[this.id] == null) {
+                    var scr = document.createElement("script");
+                    scr.type="text/javascript";
+                    scr.src = '/ue/polys/' + this.id + '.js';
+                    document.body.appendChild(scr);
+                } else {
+                    polygons = polyById[this.id];
+                    for (i=0; i<polygons.length;i++) {
+                        polygons[i].setMap(map);
+                    }
+                }
+                var center = new google.maps.LatLng(obcinaByID[this.id].lat, obcinaByID[this.id].lng);
+                if (marker)
+                    marker.setMap(null);
+                marker = new google.maps.Marker({position: center, map: map});
+            }).hover(
+                function () {this.className = this.className.replace('OFF', 'ON');},
+                function () {this.className = this.className.replace('ON', 'OFF');}
+            );
+        });
+    }
+    activate_obcine();
+});
+</script>
+<style>
+    body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+    #content {
+        height: 100%;
+        width: 98%;
+        margin: 0;
+    }
+    #map {
+        width: 100%;
+        height: 100%;
+    }
+    #mapfixed {
+        position: fixed;
+        top:0;
+        left: 0;
+        width: 80%;
+        height: 100%;
+    }
+    #obcine {
+        height: auto;
+        padding-left: 10px;
+    }
+    #obcinefixed {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 20%;
+        height: 100%;
+        overflow: auto;
+        z-index: 10;
+        background-color: #fff;
+    }
+    .linkOFF {color: darkblue}
+    .linkON {color: white; background-color: darkblue}
+</style>
+</head>
+<body>
+<div id="content">
+    <div id="mapfixed">
+        <div id="map"></div>
+    </div>
+    <div id="obcinefixed">
+        <div id="obcine">
+            {% for obcina in obcine %}
+            <div id="{{ obcina.ue_id }}" class="obcina linkOFF">{{ obcina }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
