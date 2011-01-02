@@ -25,8 +25,12 @@ def reverse_obcina(request):
     obcina_id = None
     if latlon:
         lat, lon = [float(i) for i in latlon.split(',')]
-        obcina = Obcina.objects.get(the_geom__contains='POINT(%f %f)' % (lon, lat))
-        obcina_id = obcina.ob_id
+        try:
+            obcina = Obcina.objects.get(the_geom__contains='POINT(%f %f)' % (lon, lat))
+        except Obcina.DoesNotExist:
+            pass
+        else:
+            obcina_id = obcina.ob_id
     return HttpResponse(simplejson.dumps({'status':'ok', 'obcina_id': obcina_id}))
 
 def index(request):
