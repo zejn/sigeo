@@ -1,6 +1,7 @@
-
+# *-* coding: utf-8 *-*
 from django.core.management.base import BaseCommand
 from optparse import make_option
+from django.db import transaction
 
 class Command(BaseCommand):
 	help = "Nalozi bazo in geopodatke obcin"
@@ -9,6 +10,7 @@ class Command(BaseCommand):
 			help='drop table if exist before loading new data'),
 		)
 	
+	@transaction.commit_on_success()
 	def handle(self, *args, **options):
 		from django.db import connection
 		from sigeo.obcine.models import Obcina
@@ -49,7 +51,16 @@ class Command(BaseCommand):
 			ob.the_geom.transform(trans)
 			ob.save()
 		cur.execute('''ALTER TABLE %s ADD CONSTRAINT enforce_srid_the_geom CHECK (st_srid(the_geom) = 4326);''' % table_name)
-		connection.connection.commit()
+		cur.execute('''UPDATE geometry_columns SET srid=4326 WHERE f_table_name='%s' AND f_geometry_column = 'the_geom';''' % table_name)
+		
+		# check now is everything is ok
+		from django.contrib.gis.geos import GEOSGeometry
+		c = Obcina.objects.get(ob_id=1)
+		assert c.ob_ime.upper() == u'AJDOVŠČINA'
+		assert c.the_geom.centroid == GEOSGeometry('POINT (13.9075089930651767 45.8993739353968309)')
+		z = Obcina.objects.get(ob_id=23)
+		assert z.ob_ime.upper() == u'DOMŽALE'
+		assert z.the_geom.centroid == GEOSGeometry('POINT (14.6268742810941141 46.1450992072178892)')
 		
 		print 'Done.'
 
