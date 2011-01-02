@@ -21,10 +21,15 @@ nekaj pogojev, tako da si jih je potrebno prebrati in shraniti kopijo.
 Opombe
 ------
 
-Slovenija ima svoj koordinatni sistem, ki je v primerjavi z WGS 84 (GPS, SRID
-4326) koordinatami zamaknjen za priblizno 1 sekundo in 17 sekund po drugi osi.
-To so približne številke, prave enačbe pa še nimam. Če jo poznaš, prosim
-pomagaj.
+Zaradi zgodovinskih zapletov ima Slovenija v PostGISu zaveden napačen
+prostorski referenčni sistem. Sistem je sicer EPSG:3787 znan tudi kot MGI, ki
+je po razpadu Avstro-Ogrske razpadel na dve inačici: Avstrija je privzela, da
+se otok Hierro, ki specificira refernčni poldnevnik, nahaja na 17° 40′ 00″,
+Madžarska in Jugoslavija pa sta privzeli, da ta otok leži na 17° 39′ 46”.
+Ob tem je nastalo 14" sekund razlike, ta razlika pa se zdaj pri `uvozu podatkov
+pravilno upošteva`_.
+
+.. _`uvozu podatkov pravilno upošteva`: https://github.com/zejn/sigeo/blob/master/sigeo/preprocessing.py
 
 Nastavitev projekta
 -------------------
@@ -34,10 +39,8 @@ kolikor boste sledili temu vrstnemu redu:
 
  1. git clone
  2. nastavitev podatkovne baze v settings.py (brez syncdb!)
- 3. ./sigeo/shp2sql.sh OB.shp > obcine.sql
- 4. psql dbname < obcine.sql
- 5. ./manage.py sigeo_sync_srid
- 6. ./manage.py syncdb
- 7. ./manage.py runserver
- 8.  obišči http://localhost:8000/obcine/
+ 3. ./manage.py syncdb
+ 4. ./sigeo/manage.py sigeo_load_obcine OB.shp --drop
+ 5. ./manage.py runserver
+ 6.  obišči http://localhost:8000/obcine/
 
