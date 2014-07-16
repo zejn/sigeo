@@ -44,3 +44,25 @@ kolikor boste sledili temu vrstnemu redu:
  5. ./manage.py runserver
  6.  obišči http://localhost:8000/obcine/
 
+
+Namestitev GDAL v virtualenv
+----------------------------
+
+Namesti knjižnice, ki jih GDAL zahteva.
+
+  apt-get install build-dep python-gdal
+
+Najprej je potrebno najti različico, ki ustreza nameščeni knjižnici.
+
+  dpkg -l | grep gdal | awk '/^ii/ { print $3}'
+
+Prenesi GDAL, ampak ga prevedi in namesti ročno.
+
+  pip install --no-install GDAL==1.10.1
+
+  cd $VIRTUAL_ENV/build/GDAL
+
+  python setup.py build_ext --include-dirs=/usr/include/gdal
+
+  python setup.py install
+

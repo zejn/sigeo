@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url, include
 
 urlpatterns = patterns('sigeo.ue.views',
     url(r'^$', 'index', name='ue_index'),

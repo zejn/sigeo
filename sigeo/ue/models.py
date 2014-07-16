@@ -10,7 +10,7 @@ class UpravnaEnota(models.Model):
 	ue_pov = models.FloatField()
 	y_c = models.DecimalField(max_digits=11, decimal_places=0)
 	x_c = models.DecimalField(max_digits=11, decimal_places=0)
-	the_geom = models.MultiPolygonField()
+	geom = models.MultiPolygonField()
 	
 	objects = models.GeoManager()
 	
