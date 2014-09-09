@@ -48,11 +48,11 @@ class Command(BaseCommand):
 			cur = connection.cursor()
 			
 			trans = get_coordtransform()
-			cur.execute('''ALTER TABLE %s DROP CONSTRAINT enforce_srid_geom;''' % table_name)
+			cur.execute('''ALTER TABLE %s DROP CONSTRAINT enforce_srid_the_geom;''' % table_name)
 			for ob in UpravnaEnota.objects.all():
 				ob.the_geom.transform(trans)
 				ob.save()
-			cur.execute('''ALTER TABLE %s ADD CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4326);''' % table_name)
+			cur.execute('''ALTER TABLE %s ADD CONSTRAINT enforce_srid_the_geom CHECK (st_srid(the_geom) = 4326);''' % table_name)
 			cur.execute('''UPDATE geometry_columns SET srid=4326 WHERE f_table_name='%s' AND f_geometry_column = 'the_geom';''' % table_name)
 			
 			# check now is everything is ok
