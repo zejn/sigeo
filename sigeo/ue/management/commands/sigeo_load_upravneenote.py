@@ -23,7 +23,7 @@ class Command(BaseCommand):
 			
 			dump_file = args[0]
 			shp2pgsql = '/usr/bin/shp2pgsql'
-			cmd = [shp2pgsql, '-s', '3787', '-W', 'WINDOWS-1250', dump_file, table_name]
+			cmd = [shp2pgsql, '-s', '3787', '-g', 'the_geom', '-W', 'WINDOWS-1250', dump_file, table_name]
 			print ' '.join(cmd)
 			p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 			
@@ -50,21 +50,21 @@ class Command(BaseCommand):
 			trans = get_coordtransform()
 			cur.execute('''ALTER TABLE %s DROP CONSTRAINT enforce_srid_geom;''' % table_name)
 			for ob in UpravnaEnota.objects.all():
-				ob.geom.transform(trans)
+				ob.the_geom.transform(trans)
 				ob.save()
-			cur.execute('''ALTER TABLE %s ADD CONSTRAINT enforce_srid_geom CHECK (st_srid(geom) = 4326);''' % table_name)
-			cur.execute('''UPDATE geometry_columns SET srid=4326 WHERE f_table_name='%s' AND f_geometry_column = 'geom';''' % table_name)
+			cur.execute('''ALTER TABLE %s ADD CONSTRAINT enforce_srid_geom CHECK (st_srid(the_geom) = 4326);''' % table_name)
+			cur.execute('''UPDATE geometry_columns SET srid=4326 WHERE f_table_name='%s' AND f_geometry_column = 'the_geom';''' % table_name)
 			
 			# check now is everything is ok
 			from django.contrib.gis.geos import GEOSGeometry
 			cs = UpravnaEnota.objects.get(ue_id=1)
 			assert cs.ue_ime.upper() == u'AJDOVŠČINA'
-			assert round(cs.geom.centroid.x, 7) == 13.9309896
-			assert round(cs.geom.centroid.y, 7) == 45.8757997
+			assert round(cs.the_geom.centroid.x, 7) == 13.9309896
+			assert round(cs.the_geom.centroid.y, 7) == 45.8757997
 			z = UpravnaEnota.objects.get(ue_id=6)
 			assert z.ue_ime.upper() == u'DOMŽALE'
-			assert round(z.geom.centroid.x, 7) == 14.6950667
-			assert round(z.geom.centroid.y, 7) == 46.1539159
+			assert round(z.the_geom.centroid.x, 7) == 14.6950667
+			assert round(z.the_geom.centroid.y, 7) == 46.1539159
 			
 			print 'Done.'
 
